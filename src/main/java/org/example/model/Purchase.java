@@ -5,14 +5,12 @@ public class Purchase {
     private String customerId;
     private int quantity;
 
-    // Конструктор
     public Purchase(String productId, String customerId, int quantity) {
         this.productId = productId;
         this.customerId = customerId;
         this.quantity = quantity;
     }
 
-    // Геттеры и сеттеры
     public String getProductId() {
         return productId;
     }
@@ -39,6 +37,6 @@ public class Purchase {
 
     @Override
     public String toString() {
-        return "Purchase [Product ID=" + productId + ", Customer ID=" + customerId + ", Quantity=" + quantity + "]";
+        return "Purchase{productId='" + productId + "', customerId='" + customerId + "', quantity=" + quantity + "}";
     }
 }

@@ -4,19 +4,13 @@ public class Customer {
     private String id;
     private String name;
 
-    // Конструктор
     public Customer(String id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    // Геттеры и сеттеры
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -29,6 +23,6 @@ public class Customer {
 
     @Override
     public String toString() {
-        return "Customer [ID=" + id + ", Name=" + name + "]";
+        return id + " - " + name;
     }
 }
