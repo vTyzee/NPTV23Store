@@ -4,8 +4,8 @@ import java.util.List;
 
 public interface Service<T> {
     boolean add();
-    List<T> getAll(); // Метод для получения всех элементов
+    boolean edit(T entity);
+    boolean remove(T entity);
     void print();
-    void update();
-    void delete();
+    List<T> list();
 }

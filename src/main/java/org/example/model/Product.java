@@ -1,25 +1,16 @@
 package org.example.model;
 
 public class Product {
-    private String id;
     private String name;
+    private String description;
     private double price;
 
-    public Product(String id, String name, double price) {
-        this.id = id;
+    public Product() {}
+
+    public Product(String name, String description, double price) {
         this.name = name;
+        this.description = description;
         this.price = price;
-    }
-
-    // Геттеры и сеттеры...
-
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -28,6 +19,14 @@ public class Product {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public double getPrice() {
@@ -40,6 +39,6 @@ public class Product {
 
     @Override
     public String toString() {
-        return "Product{id='" + id + "', name='" + name + "', price=" + price + "}";
+        return "Название: " + name + ", Описание: " + description + ", Цена: " + price;
     }
 }

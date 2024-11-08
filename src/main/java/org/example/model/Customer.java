@@ -1,15 +1,25 @@
 package org.example.model;
 
-public class Customer {
-    private String id;
-    private String name;
+import java.util.UUID;
 
-    public Customer(String id, String name) {
-        this.id = id;
-        this.name = name;
+public class Customer {
+    private UUID id;
+    private String name;
+    private String surname;
+    private String phone;
+
+    public Customer() {
+        this.id = UUID.randomUUID();
     }
 
-    public String getId() {
+    public Customer(String name, String surname, String phone) {
+        this.id = UUID.randomUUID();
+        this.name = name;
+        this.surname = surname;
+        this.phone = phone;
+    }
+
+    public UUID getId() {
         return id;
     }
 
@@ -21,8 +31,24 @@ public class Customer {
         this.name = name;
     }
 
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
     @Override
     public String toString() {
-        return id + " - " + name;
+        return "Имя: " + name + ", Фамилия: " + surname + ", Телефон: " + phone;
     }
 }
