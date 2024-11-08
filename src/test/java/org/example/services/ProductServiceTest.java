@@ -1,55 +1,127 @@
 package org.example.services;
 
-import org.example.apphelpers.ProductAppHelper;
+import org.example.interfaces.AppHelper;
+import org.example.interfaces.FileRepository;
+import org.example.interfaces.Input;
 import org.example.model.Product;
-import org.example.storage.Storage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class ProductServiceTest {
+class ProductServiceTest {
+
+    @Mock
+    private FileRepository<Product> petStuffRepository;
+
+    @Mock
+    private AppHelper<Product> appHelperPetStuff;
+
+    @Mock
+    private Input inputProvider;
+
+    @InjectMocks
     private ProductService productService;
-    private ProductAppHelper appHelperMock;
-    private Storage<Product> storage;
 
     @BeforeEach
-    public void setUp() {
-        appHelperMock = Mockito.spy(new ProductAppHelper());
-        storage = new Storage<>();
-
-        // Мокируем метод create, чтобы он возвращал объект Product
-        doReturn(new Product("001", "Sample Product", 29.99)).when(appHelperMock).create();
-
-        productService = new ProductService(appHelperMock, storage);
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void testAddProduct() {
-        boolean result = productService.add(); // Добавление продукта через метод add()
+    void add_ShouldAddPetStuffSuccessfully() {
+        Product product = new Product("Toy", "Cat toy", 15.99, true, 4.5);
+        when(appHelperPetStuff.create()).thenReturn(product);
 
-        assertTrue(result, "Продукт должен быть успешно добавлен");
-        List<Product> products = productService.getAll(); // Получаем все продукты
-        assertEquals(1, products.size(), "Должен быть один продукт в хранилище");
-        assertEquals("001", products.get(0).getId());
-        assertEquals("Sample Product", products.get(0).getName());
-        assertEquals(29.99, products.get(0).getPrice());
+        boolean result = productService.add();
+
+        assertTrue(result);
+        verify(petStuffRepository, times(1)).save(product);
     }
 
     @Test
-    public void testGetAllProducts() {
-        // Добавляем два продукта через замокированный метод create()
-        productService.add();
-        doReturn(new Product("002", "Another Product", 49.99)).when(appHelperMock).create();
-        productService.add();
+    void add_ShouldReturnFalseWhenPetStuffCreationFails() {
+        when(appHelperPetStuff.create()).thenReturn(null);
 
-        List<Product> products = productService.getAll();
-        assertEquals(2, products.size(), "Должно быть два продукта в хранилище");
-        assertEquals("001", products.get(0).getId());
-        assertEquals("002", products.get(1).getId());
+        boolean result = productService.add();
+
+        assertFalse(result);
+        verify(petStuffRepository, never()).save(any(Product.class));
+    }
+
+    @Test
+    void print_ShouldPrintPetStuffList() {
+        List<Product> products = new ArrayList<>();
+        products.add(new Product("Toy", "Cat toy", 15.99, true, 4.5));
+        when(petStuffRepository.load()).thenReturn(products);
+
+        productService.print();
+
+        verify(appHelperPetStuff, times(1)).printList(products);
+    }
+
+    @Test
+    void edit_ShouldEditPetStuffSuccessfully() {
+        List<Product> products = new ArrayList<>();
+        Product product = new Product("Toy", "Cat toy", 15.99, true, 4.5);
+        products.add(product);
+        when(petStuffRepository.load()).thenReturn(products);
+        when(inputProvider.getInput()).thenReturn("1");
+        Product updatedProduct = new Product("Updated Toy", "Updated cat toy", 19.99, false, 3.5);
+        when(appHelperPetStuff.create()).thenReturn(updatedProduct);
+
+        boolean result = productService.edit(product);
+
+        assertTrue(result);
+        verify(petStuffRepository, times(1)).save(products);
+        assertEquals(updatedProduct, products.get(0));
+    }
+
+    @Test
+    void edit_ShouldReturnFalseWhenIndexIsInvalid() {
+        List<Product> products = new ArrayList<>();
+        products.add(new Product("Toy", "Cat toy", 15.99, true, 4.5));
+        when(petStuffRepository.load()).thenReturn(products);
+        when(inputProvider.getInput()).thenReturn("2"); // Invalid index
+
+        boolean result = productService.edit(products.get(0));
+
+        assertFalse(result);
+        verify(petStuffRepository, never()).save(products);
+    }
+
+    @Test
+    void remove_ShouldRemovePetStuffSuccessfully() {
+        List<Product> products = new ArrayList<>();
+        Product product = new Product("Toy", "Cat toy", 15.99, true, 4.5);
+        products.add(product);
+        when(petStuffRepository.load()).thenReturn(products);
+        when(inputProvider.getInput()).thenReturn("1");
+
+        boolean result = productService.remove(product);
+
+        assertTrue(result);
+        verify(petStuffRepository, times(1)).save(products);
+        assertTrue(products.isEmpty());
+    }
+
+    @Test
+    void remove_ShouldReturnFalseWhenIndexIsInvalid() {
+        List<Product> products = new ArrayList<>();
+        products.add(new Product("Toy", "Cat toy", 15.99, true, 4.5));
+        when(petStuffRepository.load()).thenReturn(products);
+        when(inputProvider.getInput()).thenReturn("2"); // Invalid index
+
+        boolean result = productService.remove(products.get(0));
+
+        assertFalse(result);
+        verify(petStuffRepository, never()).save(products);
     }
 }

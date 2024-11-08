@@ -1,54 +1,127 @@
 package org.example.services;
 
-import org.example.apphelpers.CustomerAppHelper;
+import org.example.interfaces.AppHelper;
+import org.example.interfaces.FileRepository;
+import org.example.interfaces.Input;
 import org.example.model.Customer;
-import org.example.storage.Storage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.*;
 
-public class CustomerServiceTest {
+class CustomerServiceTest {
+
+    @Mock
+    private FileRepository<Customer> customerRepository;
+
+    @Mock
+    private AppHelper<Customer> appHelperCustomer;
+
+    @Mock
+    private Input inputProvider;
+
+    @InjectMocks
     private CustomerService customerService;
-    private CustomerAppHelper appHelperMock;
-    private Storage<Customer> storage;
 
     @BeforeEach
-    public void setUp() {
-        appHelperMock = Mockito.spy(new CustomerAppHelper());
-        storage = new Storage<>();
-
-        // Мокируем метод create, чтобы он возвращал объект Customer
-        doReturn(new Customer("123", "John Doe")).when(appHelperMock).create();
-
-        customerService = new CustomerService(appHelperMock, storage);
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void testAddCustomer() {
-        boolean result = customerService.add(); // Добавление клиента через метод add()
+    void add_ShouldAddCustomerSuccessfully() {
+        Customer customer = new Customer("John", "Doe", "johndoe@example.com");
+        when(appHelperCustomer.create()).thenReturn(customer);
 
-        assertTrue(result, "Клиент должен быть успешно добавлен");
-        List<Customer> customers = customerService.getAll(); // Получаем всех клиентов
-        assertEquals(1, customers.size(), "Должен быть один клиент в хранилище");
-        assertEquals("123", customers.get(0).getId());
-        assertEquals("John Doe", customers.get(0).getName());
+        boolean result = customerService.add();
+
+        assertTrue(result);
+        verify(customerRepository, times(1)).save(customer);
     }
 
     @Test
-    public void testGetAllCustomers() {
-        // Добавляем двух клиентов через замокированный метод create()
-        customerService.add();
-        doReturn(new Customer("124", "Jane Doe")).when(appHelperMock).create();
-        customerService.add();
+    void add_ShouldReturnFalseWhenCustomerCreationFails() {
+        when(appHelperCustomer.create()).thenReturn(null);
 
-        List<Customer> customers = customerService.getAll();
-        assertEquals(2, customers.size(), "Должно быть два клиента в хранилище");
-        assertEquals("123", customers.get(0).getId());
-        assertEquals("124", customers.get(1).getId());
+        boolean result = customerService.add();
+
+        assertFalse(result);
+        verify(customerRepository, never()).save(any(Customer.class));
+    }
+
+    @Test
+    void print_ShouldPrintCustomerList() {
+        List<Customer> customers = new ArrayList<>();
+        customers.add(new Customer("John", "Doe", "johndoe@example.com"));
+        when(customerRepository.load()).thenReturn(customers);
+
+        customerService.print();
+
+        verify(appHelperCustomer, times(1)).printList(customers);
+    }
+
+    @Test
+    void edit_ShouldEditCustomerSuccessfully() {
+        List<Customer> customers = new ArrayList<>();
+        Customer customer = new Customer("John", "Doe", "johndoe@example.com");
+        customers.add(customer);
+        when(customerRepository.load()).thenReturn(customers);
+        when(inputProvider.getInput()).thenReturn("1");
+        Customer updatedCustomer = new Customer("Jane", "Doe", "janedoe@example.com");
+        when(appHelperCustomer.create()).thenReturn(updatedCustomer);
+
+        boolean result = customerService.edit(customer);
+
+        assertTrue(result);
+        verify(customerRepository, times(1)).save(customers);
+        assertEquals(updatedCustomer, customers.get(0));
+    }
+
+    @Test
+    void edit_ShouldReturnFalseWhenIndexIsInvalid() {
+        List<Customer> customers = new ArrayList<>();
+        customers.add(new Customer("John", "Doe", "johndoe@example.com"));
+        when(customerRepository.load()).thenReturn(customers);
+        when(inputProvider.getInput()).thenReturn("2"); // Invalid index
+
+        boolean result = customerService.edit(customers.get(0));
+
+        assertFalse(result);
+        verify(customerRepository, never()).save(customers);
+    }
+
+    @Test
+    void remove_ShouldRemoveCustomerSuccessfully() {
+        List<Customer> customers = new ArrayList<>();
+        Customer customer = new Customer("John", "Doe", "johndoe@example.com");
+        customers.add(customer);
+        when(customerRepository.load()).thenReturn(customers);
+        when(inputProvider.getInput()).thenReturn("1");
+
+        boolean result = customerService.remove(customer);
+
+        assertTrue(result);
+        verify(customerRepository, times(1)).save(customers);
+        assertTrue(customers.isEmpty());
+    }
+
+    @Test
+    void remove_ShouldReturnFalseWhenIndexIsInvalid() {
+        List<Customer> customers = new ArrayList<>();
+        customers.add(new Customer("John", "Doe", "johndoe@example.com"));
+        when(customerRepository.load()).thenReturn(customers);
+        when(inputProvider.getInput()).thenReturn("2"); // Invalid index
+
+        boolean result = customerService.remove(customers.get(0));
+
+        assertFalse(result);
+        verify(customerRepository, never()).save(customers);
     }
 }

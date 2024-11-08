@@ -1,42 +1,61 @@
 package org.example.model;
 
-public class Purchase {
-    private String productId;
-    private String customerId;
-    private int quantity;
+import java.io.Serializable;
+import java.util.UUID;
+import java.time.LocalDate;
 
-    public Purchase(String productId, String customerId, int quantity) {
-        this.productId = productId;
-        this.customerId = customerId;
-        this.quantity = quantity;
+public class Purchase implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    private UUID id;
+    private Customer customer;
+    private Product product;
+    private LocalDate purchaseDate;
+    private boolean useDiscount;
+
+    public Purchase(Customer customer, Product product, boolean useDiscount) {
+        this.id = UUID.randomUUID();
+        this.customer = customer;
+        this.product = product;
+        this.purchaseDate = LocalDate.now();
+        this.useDiscount = useDiscount;
     }
 
-    public String getProductId() {
-        return productId;
+    // Геттеры и сеттеры
+
+    public UUID getId() {
+        return id;
     }
 
-    public void setProductId(String productId) {
-        this.productId = productId;
+    public Customer getCustomer() {
+        return customer;
     }
 
-    public String getCustomerId() {
-        return customerId;
+    public Product getPetStuff() {
+        return product;
     }
 
-    public void setCustomerId(String customerId) {
-        this.customerId = customerId;
+    public LocalDate getPurchaseDate() {
+        return purchaseDate;
     }
 
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
+    public boolean isUseDiscount() {
+        return useDiscount;
     }
 
     @Override
     public String toString() {
-        return "Purchase{productId='" + productId + "', customerId='" + customerId + "', quantity=" + quantity + "}";
+        StringBuilder sb = new StringBuilder();
+        sb.append("Покупатель: ").append(customer);
+        sb.append(", Товар: ").append(product);
+
+        if (useDiscount) {
+            sb.append(" (приобретен по скидке за: ").append(product.getDiscountedPrice()).append(")");
+        } else {
+            sb.append(" (приобретен по полной цене: ").append(product.getPrice()).append(")");
+        }
+
+        sb.append(", Дата покупки: ").append(purchaseDate);
+        return sb.toString();
     }
 }
