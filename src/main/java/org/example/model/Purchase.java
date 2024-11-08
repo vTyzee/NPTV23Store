@@ -1,42 +1,39 @@
 package org.example.model;
 
+import java.util.UUID;
+import java.time.LocalDate;
+
 public class Purchase {
-    private String productId;
-    private String customerId;
-    private int quantity;
+    private UUID id;
+    private Customer customer;
+    private Product product;
+    private LocalDate purchaseDate;
 
-    public Purchase(String productId, String customerId, int quantity) {
-        this.productId = productId;
-        this.customerId = customerId;
-        this.quantity = quantity;
+    public Purchase(Customer customer, Product product) {
+        this.id = UUID.randomUUID();
+        this.customer = customer;
+        this.product = product;
+        this.purchaseDate = LocalDate.now();
     }
 
-    public String getProductId() {
-        return productId;
+    public UUID getId() {
+        return id;
     }
 
-    public void setProductId(String productId) {
-        this.productId = productId;
+    public Customer getCustomer() {
+        return customer;
     }
 
-    public String getCustomerId() {
-        return customerId;
+    public Product getProduct() {
+        return product;
     }
 
-    public void setCustomerId(String customerId) {
-        this.customerId = customerId;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
+    public LocalDate getPurchaseDate() {
+        return purchaseDate;
     }
 
     @Override
     public String toString() {
-        return "Purchase{productId='" + productId + "', customerId='" + customerId + "', quantity=" + quantity + "}";
+        return "Покупатель: " + customer + ", Товар: " + product + ", Дата покупки: " + purchaseDate;
     }
 }
